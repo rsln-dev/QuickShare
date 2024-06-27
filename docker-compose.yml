@@ -1,0 +1,8 @@
+﻿services:
+  quickshare:
+    image: quickshare
+    build:
+      context: .
+      dockerfile: QuickShare/Dockerfile
+    ports:
+      - "80:80"
