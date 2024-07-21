@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using QuickShare.Data.Configurations;
 using QuickShare.Data.Entities;
 
 namespace QuickShare.Data;
@@ -16,6 +17,10 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.ApplyConfiguration(new EntryConfiguration());
+        modelBuilder.ApplyConfiguration(new SpaceConfiguration());
+        modelBuilder.ApplyConfiguration(new FileConfiguration());
         
         modelBuilder.UseHiLo();
     }

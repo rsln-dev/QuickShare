@@ -6,4 +6,5 @@ public class SpaceEntity
     public string Slug { get; set; } = null!;
     public int TTL { get; set; } // value in seconds
     public List<EntryEntity> Entries { get; set; } = new ();
+    public DateTime CreatedAt { get; set; }
 }
