@@ -1,17 +1,23 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using QuickShare.Data;
 using QuickShare.Data.Entities;
+using QuickShare.Services;
+using QuickShare.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace QuickShare;
 
 public class TestApp
 {
-    private ApplicationDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
+    private ISpaceService _spaceService;
+    private IEntryService _entryService;
     
-    public TestApp(ApplicationDbContext dbContext)
+    public TestApp(ApplicationDbContext dbContext, ISpaceService spaceService, IEntryService entryService)
     {
         _dbContext = dbContext;
+        _spaceService = spaceService;
+        _entryService = entryService;
     }
 
     public async Task Start1()
@@ -40,4 +46,26 @@ public class TestApp
         Console.WriteLine(entity.Slug);
         Console.WriteLine(entity.TTL);
     }
-}
+    
+    public async Task Start3()
+    {
+        var newSpace = await _spaceService.CreateSpace(5, 3600);
+        
+        Console.WriteLine("Slg");
+        Console.WriteLine(newSpace.Slug);
+
+        var entity = await _entryService.CreateEntry(newSpace.Id, "Lorem Ipsum Dolor 333");
+        
+        Console.WriteLine("Entity");
+        Console.WriteLine(entity);
+
+        var space = await _spaceService.GetSpace(newSpace.Slug);
+
+        var json = JsonConvert.SerializeObject(space,
+            new JsonSerializerSettings {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
+        
+        Console.WriteLine(json);
+    }
+} 

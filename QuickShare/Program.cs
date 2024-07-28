@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using QuickShare;
 using QuickShare.Data;
+using QuickShare.Services;
+using QuickShare.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddControllers();
 builder.Services.AddDbContextFactory<ApplicationDbContext>(opts => opts.UseNpgsql(connectionString));
+builder.Services.AddTransient<ISpaceService, SpaceService>();
+builder.Services.AddTransient<IEntryService, EntryService>();
+builder.Services.AddTransient<SlugService>();
 builder.Services.AddTransient<TestApp>();
 
 
@@ -31,4 +36,4 @@ using (var scope = app.Services.CreateScope())
 
 var testApp = builder.Services.BuildServiceProvider().GetService<TestApp>();
 
-await testApp!.Start2();
+await testApp!.Start3();
