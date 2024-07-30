@@ -1,22 +1,26 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using QuickShare.Data;
 using QuickShare.Data.Entities;
+using QuickShare.Models.Dtos;
 using QuickShare.Services.Interfaces;
 
 namespace QuickShare.Services;
 
-public class SpaceService: ISpaceService
+public class SpaceService : ISpaceService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly SlugService _slugService;
+    private readonly IMapper _mapper;
 
-    public SpaceService(ApplicationDbContext dbContext, SlugService slugService)
+    public SpaceService(ApplicationDbContext dbContext, SlugService slugService, IMapper mapper)
     {
         _dbContext = dbContext;
         _slugService = slugService;
+        _mapper = mapper;
     }
 
-    public async Task<SpaceEntity> CreateSpace(int length, int ttl)
+    public async Task<string> CreateSpace(int length, int ttl)
     {
         var newSpace = new SpaceEntity()
         {
@@ -24,10 +28,10 @@ public class SpaceService: ISpaceService
             TTL = ttl,
         };
         _dbContext.Spaces.Add(newSpace);
-        
+
         await _dbContext.SaveChangesAsync();
 
-        return newSpace;
+        return newSpace.Slug;
     }
 
     public async Task<bool> DeleteSpace(int id)
@@ -40,22 +44,16 @@ public class SpaceService: ISpaceService
         }
 
         _dbContext.Entry(entity).State = EntityState.Deleted;
-        
+
         await _dbContext.SaveChangesAsync();
 
         return true;
     }
-    
-    public async Task<SpaceEntity> GetSpace(string slug)
-    {
-        var space = await _dbContext.Spaces.FirstOrDefaultAsync(el => el.Slug == slug);
-            // .Include(i => i.CatalogBrand)
-            // .Include(i => i.CatalogType)
-            // .OrderBy(c => c.Name)
-            // .Skip(pageSize * pageIndex)
-            // .Take(pageSize)
-            // .ToListAsync();
 
-            return space!;
+    public async Task<SpaceDto?> GetSpace(string slug)
+    {
+        var space = await _dbContext.Spaces.Include(s => s.Entries).FirstOrDefaultAsync(el => el.Slug == slug);
+
+        return _mapper.Map<SpaceDto>(space);
     }
 }

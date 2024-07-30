@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using QuickShare;
 using QuickShare.Data;
 using QuickShare.Services;
 using QuickShare.Services.Interfaces;
@@ -15,17 +14,18 @@ builder.Configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddDbContextFactory<ApplicationDbContext>(opts => opts.UseNpgsql(connectionString));
 builder.Services.AddTransient<ISpaceService, SpaceService>();
 builder.Services.AddTransient<IEntryService, EntryService>();
 builder.Services.AddTransient<SlugService>();
-builder.Services.AddTransient<TestApp>();
 
 
 var app = builder.Build();
-// app.UseHttpsRedirection();
-// app.UseRouting();
-// app.Run();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -34,6 +34,12 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-var testApp = builder.Services.BuildServiceProvider().GetService<TestApp>();
+// app.UseHttpsRedirection();
 
-await testApp!.Start3();
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapDefaultControllerRoute();
+    endpoints.MapControllers();
+});
+app.Run();
